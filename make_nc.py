@@ -1,4 +1,4 @@
-'''
+"""
 +-----------------------------------------------------------------------------+
 | 5.1 General structure                                                       |
 +-----------------------------------------------------------------------------+
@@ -35,7 +35,7 @@ Additional dimensions:
 
 Additional variables:
 * int targetClasses(numTimesteps) = Target classes (one for each timestep)
-'''
+"""
 
 
 ## plan:
@@ -48,76 +48,80 @@ from Scientific.IO.NetCDF import *
 import h5py
 import os
 import numpy as np
+from nc_functions import *
 
-mat = h5py.File('/home/lioruzan/bats_proj/data/spectrograms/500_250_concat.mat')
 
-concat_spectro = mat['concat_spectro'].value
-lengths = mat['lengths'].value.transpose()
-sequence_count = int(mat['num_seq'].value[0][0])
-total_length = int(mat['total_length'].value[0][0])
-sequence_labels = mat['sequence_labels'].value  ## each column signifies a different classification task
+  ## each column signifies a different classification task
                                                 ## corresponding to columns [4 5 6 7 8 9 11] in the seqAnnotation matrix
 
 
-def process_labels(matrix, column):
-    map = {}
-    vec = matrix[:, column]
+def make_nc(mat_file, labels, nc_name, nc_path):
 
-    dtype = matrix.dtype
-    vec_shape = vec.shape
+    ## bat .mat file for data
+    mat = h5py.File(mat_file)
+    concat_spectro = mat['concat_spectro'].value
+    lengths = mat['lengths'].value
+    sequence_count = int(mat['num_seq'].value[0][0])
+    total_length = int(mat['total_length'].value[0][0])
 
-    new_vec = np.zeros(vec_shape, dtype)
-    c = 0
-    for i in xrange(len(vec)):
+    ## open new .nc file
+    nc_path = os.path.join(nc_path, nc_name)
+    nc_file = NetCDFFile(nc_path, 'w')
 
-        old_num = vec[i]
-        if old_num not in map.keys():
+    ## create dimensions
+    numSeqs_name = 'numSeqs'
+    numSeqs_size = sequence_count
+    nc_file.createDimension(numSeqs_name, numSeqs_size)
 
-            map[old_num] = c
-            c += 1
-        new_vec[i] = map[old_num]
-    matrix[:, column] = new_vec
-    return map
+    numTimeSteps_name = 'numTimeSteps'
+    numTimeSteps_size = total_length
+    nc_file.createDimension(numTimeSteps_name, numTimeSteps_size)
 
+    inputPattSize_name = 'inputPattSize'
+    inputPattSize_size = 257
+    nc_file.createDimension(inputPattSize_name, inputPattSize_size)
 
-label_maps = [process_labels(sequence_labels, i) for i in xrange(sequence_labels.shape[0])]
+    maxSeqTagLength_name = 'maxSeqTagLength'
+    maxSeqTagLength_size = int(np.ceil(np.log10(sequence_count))+1)
+    nc_file.createDimension(maxSeqTagLength_name, maxSeqTagLength_size)
 
-# open new .nc file
-f = NetCDFFile('/home/lioruzan/bats_proj/data/nc_files/test.nc', 'w')
+    numLabels_name = 'numLabels'
+    numLabels_size = labels.shape[0]
+    nc_file.createDimension(numLabels_name, numLabels_size)
 
+    #######################################################
+    ## create variables
+    # varDims = (1, 2)
+    # var1 = f.createVariable('varOne', 'i', varDims)
+    seqTags_dims = (numSeqs_name, maxSeqTagLength_name)
+    seqTags_var = nc_file.createVariable('seqTags', 'c', seqTags_dims)
 
-# create dimensions
-numSeqs_name = 'numSeqs'
-numSeqs_size = sequence_count
-f.createDimension(numSeqs_name, numSeqs_size)
+    seqLengths_dims = (numSeqs_name,)
+    seqLengths_var = nc_file.createVariable('seqLengths', 'i', seqLengths_dims)
 
-numTimeSteps_name = 'numTimeSteps'
-numTimeSteps_size = total_length
-f.createDimension(numTimeSteps_name, numTimeSteps_size)
+    inputs_dims = (numTimeSteps_name, inputPattSize_name)
+    inputs_var = nc_file.createVariable('inputs', 'f', inputs_dims)
 
-inputPattSize_name = 'inputPattSize'
-inputPattSize_size = 257
-f.createDimension(inputPattSize_name, inputPattSize_size)
+    targetClasses_dims = (numTimeSteps_name,)
+    targetClasses_vars = nc_file.createVariable('targetClasses', 'i', targetClasses_dims)
 
-maxSeqTagLength_name = 'maxSeqTagLength'
-maxSeqTagLength_size = int(np.ceil(np.log10(sequence_count))+1)
-f.createDimension(maxSeqTagLength_name, maxSeqTagLength_size)
+    #######################################################
+    ## fill variables
+    for i in xrange(total_length):
+        num = str(i)
+        num_len = len(num)
+        seqTags_var[i, 0:num_len] = num
 
-numLabels_name = 'numLabels'
-numLabels_size = ? # update, depends on classification task
-f.createDimension(numLabels_name, numLabels_size)
+    lengths = lengths.astype(np.int32)
+    seqLengths_var[:] = lengths
 
-# create variables
-# varDims = (1, 2)
-# var1 = f.createVariable('varOne', 'i', varDims)
-seqTags_dims = (numSeqs_name, maxSeqTagLength_name)
-seqTags_var = f.createVariable('seqTags', 'c', seqTags_dims)
+    inputs_var[:] = concat_spectro
 
-seqLengths_dims = (numSeqs_name,)
-seqLengths_var = f.createVariable('seqLengths', 'i', seqTags_dims)
+    labels = stretch_labels(labels, lengths)
+    targetClasses_vars[:] = labels
 
-inputs_dims = (numTimeSteps_name, inputPattSize_name)
-inputs_var = f.createVariable('inputs', 'f', inputs_dims)
-
-targetClasses_dims = (numTimeSteps_name,)
-targetClasses_vars = f.createVariable('targetClasses', 'i', targetClasses_dims)
+    #######################################################
+    ## end nc creation, clean up
+    nc_file.flush(); nc_file.close()
+    mat.close()
+    #######################################################
