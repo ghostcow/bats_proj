@@ -50,6 +50,7 @@ import numpy as np
 from nc_functions import *
 
 
+# don't forget to reshape 'lengths' to vector of dimension (dim,)
 def _make_nc(concat_spectro, labels, lengths, nc_name, nc_path):
 
     ## open new .nc file
@@ -68,7 +69,7 @@ def _make_nc(concat_spectro, labels, lengths, nc_name, nc_path):
     nc_file.createDimension(numTimeSteps_name, numTimeSteps_size)
 
     inputPattSize_name = 'inputPattSize'
-    inputPattSize_size = 257
+    inputPattSize_size = concat_spectro.shape[1]
     nc_file.createDimension(inputPattSize_name, inputPattSize_size)
 
     maxSeqTagLength_name = 'maxSeqTagLength'
@@ -102,8 +103,6 @@ def _make_nc(concat_spectro, labels, lengths, nc_name, nc_path):
         num_len = len(num)
         seqTags_var[i, 0:num_len] = num
 
-    lengths = lengths.astype(np.int32)
-    lengths = lengths.reshape((lengths.shape[0],))
     seqLengths_var[:] = lengths
 
     inputs_var[:] = concat_spectro
@@ -114,18 +113,3 @@ def _make_nc(concat_spectro, labels, lengths, nc_name, nc_path):
     #######################################################
     ## end nc creation, clean up
     nc_file.close()
-
-
-def make_nc(mat_file, labels, nc_name, nc_path):
-
-    ## bat .mat file for data
-    mat = h5py.File(mat_file)
-    concat_spectro = mat['concat_spectro'].value
-    lengths = mat['lengths'].value
-
-    # sequence_count = int(mat['num_seq'].value[0, 0])
-    # total_length = int(mat['total_length'].value[0, 0])
-
-    _make_nc(concat_spectro, labels, lengths, nc_name, nc_path)
-    mat.close()
-    #######################################################

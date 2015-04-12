@@ -38,13 +38,6 @@ def process_labels(matrix, column):
     return map
 
 
-def load_label_matrix(mat_file):
-    mat = h5py.File(mat_file)
-    sequence_labels = mat['sequence_labels'].value
-    mat.close()
-    return sequence_labels
-
-
 def process_label_matrix(label_matrix):
     label_maps = [process_labels(label_matrix, i) for i in xrange(label_matrix.shape[1])]
     return label_maps
@@ -59,3 +52,22 @@ def stretch_labels(labels, lengths):
         out_labels[s:s+e] = np.zeros((e,), 'int32') + labels[i]
         s += e
     return out_labels
+
+
+# don't forget to reshape sequence_lengths to be one-dimensional
+# 0 <= n < matrix.shape[0]
+def get_sequence_from_matrix(n, matrix, sequence_lengths):
+    if n >= len(sequence_lengths):
+        return None
+    s = sum(sequence_lengths[0:n])
+    e = sequence_lengths[n]
+    return matrix[s:s+e]
+
+
+# also takes only vector one-dimensional sequence_lengths, labels.
+def subsample_sequences(sample_indices, sequence_matrix, sequence_lengths, labels):
+    sequences = [get_sequence_from_matrix(i, sequence_matrix, sequence_lengths) for i in sample_indices]
+    sequences = np.vstack(sequences)
+    subsampled_lengths = sequence_lengths[sample_indices]
+    subsampled_labels = labels[sample_indices]
+    return sequences, subsampled_lengths, subsampled_labels
