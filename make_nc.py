@@ -51,7 +51,7 @@ from nc_functions import *
 
 
 # don't forget to reshape 'lengths' to vector of dimension (dim,)
-def _make_nc(concat_spectro, labels, lengths, nc_name, nc_path):
+def make_nc(concat_spectro, labels, num_labels, lengths, nc_name, nc_path):
 
     ## open new .nc file
     nc_path = os.path.join(nc_path, nc_name)
@@ -77,7 +77,7 @@ def _make_nc(concat_spectro, labels, lengths, nc_name, nc_path):
     nc_file.createDimension(maxSeqTagLength_name, maxSeqTagLength_size)
 
     numLabels_name = 'numLabels'
-    numLabels_size = labels.shape[0]
+    numLabels_size = num_labels
     nc_file.createDimension(numLabels_name, numLabels_size)
 
     #######################################################
