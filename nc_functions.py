@@ -46,7 +46,7 @@ def load_label_matrix(mat_file):
 
 
 def process_label_matrix(label_matrix):
-    label_maps = [process_labels(label_matrix, i) for i in xrange(label_matrix.shape[0])]
+    label_maps = [process_labels(label_matrix, i) for i in xrange(label_matrix.shape[1])]
     return label_maps
 
 
@@ -55,7 +55,7 @@ def stretch_labels(labels, lengths):
     out_labels = np.zeros((length,), dtype='int32')
     s = 0
     for i in xrange(len(labels)):
-        e = lengths[i, 0]
+        e = lengths[i]
         out_labels[s:s+e] = np.zeros((e,), 'int32') + labels[i]
         s += e
     return out_labels

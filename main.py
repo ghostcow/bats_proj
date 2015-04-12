@@ -13,12 +13,10 @@ if __name__ == '__main__':
     ## for debugging purposes ONLY:
     col = 0
     num_cols = label_matrix.shape[1]
-    for col in xrange(num_cols):
-        labels = label_matrix[:, col]
-        nc_name = str(col)
-        make_nc(mat_file, labels, nc_name, nc_path)
-
+    labels = label_matrix[:, col]
+    nc_name = str(col) + '.nc'
     make_nc(mat_file, labels, nc_name, nc_path)
+
     ## actual code
     # num_cols = label_matrix.shape[1]
     # for col in xrange(num_cols):
