@@ -95,6 +95,8 @@ def fetch_nc_inputs(nc_files):
     return file_list, variable_list, inputs_list
 
 
+
+# deprecated
 def subtract_mean_divide_std_from_nc(file_list, variable_list, inputs_list):
     num_files = len(file_list)
     concated_input = np.vstack(inputs_list)

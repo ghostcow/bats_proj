@@ -62,7 +62,6 @@ for classification_task_num in xrange(2, 7):
         sequence_matrix /= train_std
 
         # split randomized train indices to k sets for cross-validation
-
         cv_sets = split_list(train_indices, kfold_num)
 
         ## make .nc files out of all train/val/test splits
