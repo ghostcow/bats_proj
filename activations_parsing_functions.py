@@ -59,7 +59,13 @@ def seq_labels_by_majority(timestep_labels):
     seq_labels = np.zeros(num_sequences, 'int32')
     for i in xrange(num_sequences):
 
-        current_label = mode(timestep_labels[i])[0][0]
+        current_label = mode(timestep_labels[i])
+        current_label = current_label[0][0]
         current_label = np.int32(current_label)
         seq_labels[i] = current_label
     return seq_labels
+
+
+# flatten 2-D list of lists
+def flatten_list(l):
+    return [val for sublist in l for val in sublist]

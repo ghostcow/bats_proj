@@ -23,9 +23,11 @@ if __name__ == '__main__':
     timestep_prediction_labels = get_feedforward_labels(activations)
 
     # calculate true accuracy
-    timestep_accuracy = accuracy_score(timestep_tru_labels, timestep_prediction_labels)
+    # flatten prediction labels to calculate accuracy
+    flat_timestep_prediction_labels = flatten_list(timestep_prediction_labels)
+    timestep_accuracy = accuracy_score(timestep_tru_labels, flat_timestep_prediction_labels)
 
-    sequence_ground_truth = restore_seq_label_list(timestep_tru_labels)
+    sequence_ground_truth = restore_seq_label_list(timestep_tru_labels, sequence_lengths)
     sequence_predictions = seq_labels_by_majority(timestep_prediction_labels)
     sequence_accuracy = accuracy_score(sequence_ground_truth, sequence_predictions)
 
