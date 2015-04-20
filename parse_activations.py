@@ -33,4 +33,22 @@ if __name__ == '__main__':
 
     print('timestep accuracy: ' + str(timestep_accuracy))
     print('sequence accuracy: ' + str(sequence_accuracy))
+
+
+    ################################################################################################
+    # t-SNE code
+    ################################################################################################
+
+    '''
+    tasks:
+    1. write code to average activations of a sequence for seq representations
+    2. run t-SNE on softmwax activations
+
+    other ideas:
+    1. write code to take last activation as label for accuracy + sequence representation
+    2.a addd FC layer before softmax classificatin,
+    2.b retrieve FC layer activations to use instead of softmax features
+    3. for accuracy- use mode of 2nd half of sequence
+
+
     # t-SNE sucka!!!!!!
