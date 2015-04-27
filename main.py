@@ -72,7 +72,7 @@ if __name__ == '__main__':
 
     # write out all cross validation sets
     for j in xrange(kfold_num):
-        nc_name = 'train_' +'{:02}'.format(classification_task_num) + '_' + '{:02}'.format(j) + '.nc' # example: train_01_00.nc
+        nc_name = 'train_{}fold_{:02}_{:02}.nc'.format(kfold_num, classification_task_num, j)  # example: train_5fold_01_00.nc
         sample_indices = cv_sets[j]
         train_sequences, train_lengths, train_labels = subsample_sequences(
             sample_indices, sequence_matrix, sequence_lengths, labels)
