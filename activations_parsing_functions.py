@@ -69,3 +69,9 @@ def seq_labels_by_majority(timestep_labels):
 # flatten 2-D list of lists
 def flatten_list(l):
     return [val for sublist in l for val in sublist]
+
+
+# accepts list of timestep activations of sequences
+def average_seq_activations(activations):
+    return [np.average(l, axis=0) for l in activations]
+
