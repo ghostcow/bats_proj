@@ -112,16 +112,13 @@ def t_sne(activation_size, csv_file, nc_file):
     '''
         tasks:
         V 1. write code to average activations of a sequence for seq representations
-        2. run t-SNE on softmax activations
-        3. create bogus nc files to use to extract fc activations
+        V 2. run t-SNE on softmax activations
+        V 3. create bogus nc files to use to extract last layer activations
 
         other ideas:
-        1. write code to take last activation as label for accuracy + sequence representation
-        2.a addd FC layer before softmax classificatin,
-        2.b retrieve FC layer activations to use instead of softmax features
-        3. for accuracy- use mode of 2nd half of sequence
-        4. use rnnlib to classify entire sequences with CTC loss instead of currennt.
-        5. expreiment with removing tanh activation functions from c
+        1. take last activation label for improved accuracy + better sequence representation?
+        3. use mode of 2nd half of sequence for improved accuracy
+        4. use rnnlib to classify entire sequences instead of currennt.
         '''
     # activations
     timestep_activations = parse_csv(csv_file, activation_size)

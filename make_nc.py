@@ -135,15 +135,15 @@ def make_nc(concat_spectro, labels, num_labels, lengths, nc_name, nc_path):
         seqTags[i, 0:num_len] = num
 
     seqLengths_dims = numSeqs
-    seqLengths = np.zeros(seqLengths_dims)
+    seqLengths = np.zeros(seqLengths_dims, dtype='int32')
     seqLengths[:] = lengths
 
     inputs_dims = (numTimeSteps, inputPattSize)
-    inputs = np.zeros(inputs_dims)
+    inputs = np.zeros(inputs_dims, dtype='float32')
     inputs[:] = concat_spectro
 
     targetClasses_dims = numTimeSteps
-    targetClasses = np.zeros(targetClasses_dims)
+    targetClasses = np.zeros(targetClasses_dims, dtype='int32')
     labels = stretch_labels(labels, lengths)
     targetClasses[:] = labels
 
@@ -221,20 +221,24 @@ def _make_nc(
     nc_file.close()
 
 
-def create_feedforward_dummy_nc(nc_path, nc_name, out_path):
-
-    new = NetCDFFile(out_path, 'w')
-    nc_path = os.path.join(nc_path, nc_name)
-    old = NetCDFFile(nc_path)
+# create dummy nc file for forward feeding a network with currennt.
+# dummy in the sense that it replaces the numLabels dimension with the number of output units
+def create_feedforward_dummy_nc(nc_path, old_nc_name, new_nc_name, num_output_units):
+    print os.path.join(nc_path, old_nc_name)
+    old = NetCDFFile(os.path.join(nc_path, old_nc_name))
 
     numSeqs = old.dimensions['numSeqs']
     numTimeSteps = old.dimensions['numTimeSteps']
     inputPattSize = old.dimensions['inputPattSize']
+    maxSeqTagLength = old.dimensions['maxSeqTagLength']
 
+    seqTags = old.variables['seqTags'].getValue()
+    seqLengths = old.variables['seqLengths'].getValue()
     inputs = old.variables['inputs'].getValue()
-
+    targetClasses = old.variables['targetClasses'].getValue()
+    old.close()
 
     _make_nc(
-        nc_path, nc_name, numSeqs, numTimeSteps,
-        inputPattSize, maxSeqTagLength, numLabels,
+        nc_path, new_nc_name, numSeqs, numTimeSteps,
+        inputPattSize, maxSeqTagLength, num_output_units,
         seqTags, seqLengths, inputs, targetClasses)

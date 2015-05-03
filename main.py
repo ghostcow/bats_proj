@@ -7,8 +7,9 @@ import cPickle
 
 nc_path = '/home/lioruzan/bats_proj/data/nc'
 mat_file = '/home/lioruzan/bats_proj/data/spectrograms/500_250_concat.mat'
+
 ## classification task number. between 0 and 6, indexes columns [4 5 6 7 8 9 11] in the seqAnnotation matrix.
-classification_task_num = 3 
+classification_task_num = 0
 kfold_num = 5
 
 
