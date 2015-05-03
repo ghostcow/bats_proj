@@ -5,9 +5,10 @@ from sklearn.cross_validation import KFold, train_test_split
 import cPickle
 
 
-nc_path = '/home/lioruzan/bats_proj/data/nc_test'
+nc_path = '/home/lioruzan/bats_proj/data/nc'
 mat_file = '/home/lioruzan/bats_proj/data/spectrograms/500_250_concat.mat'
-classification_task_num = 0  # first classif. task out of 7
+## classification task number. between 0 and 6, indexes columns [4 5 6 7 8 9 11] in the seqAnnotation matrix.
+classification_task_num = 3 
 kfold_num = 5
 
 
@@ -32,7 +33,7 @@ if __name__ == '__main__':
 
     mat.close()
 
-    # split to train and test, load if split exists
+    # split to train and test, load from file if split already exists
     num_sequences = len(sequence_lengths)
     splits_path = '/home/lioruzan/bats_proj/metadata/splits.pkl'
     if os.path.isfile(splits_path):
@@ -64,7 +65,7 @@ if __name__ == '__main__':
 
     ## make .nc files out of all train/val/test splits
     # write out test
-    nc_name = 'test.nc'
+    nc_name = 'test_{:02}.nc'.format(classification_task_num)
     sample_indices = test_indices
     test_sequences, test_lengths, test_labels = subsample_sequences(
         sample_indices, sequence_matrix, sequence_lengths, labels)
