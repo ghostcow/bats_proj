@@ -3,7 +3,7 @@ import numpy as np
 import csv
 from Scientific.IO.NetCDF import *
 from scipy.stats import mode
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, confusion_matrix
 import tsne
 import pylab as Plot
 
@@ -86,7 +86,7 @@ def calculate_ff_accuracy(csv_file, activation_size, nc_file):
     # activations of all timesteps
     activations = parse_csv(csv_file, activation_size)
 
-    # labels of sequences of validation set train_00_02 for starters
+    # labels of sequences of validation set
     timestep_tru_labels, sequence_lengths = get_labels_lengths_from_nc(nc_file)
 
     # get timestep labels from activations
@@ -96,12 +96,15 @@ def calculate_ff_accuracy(csv_file, activation_size, nc_file):
     # flatten prediction labels to calculate accuracy
     flat_timestep_prediction_labels = flatten_list(timestep_prediction_labels)
     timestep_accuracy = accuracy_score(timestep_tru_labels, flat_timestep_prediction_labels)
+     
     sequence_ground_truth = restore_seq_label_list(timestep_tru_labels, sequence_lengths)
     sequence_predictions = seq_labels_by_majority(timestep_prediction_labels)
     sequence_accuracy = accuracy_score(sequence_ground_truth, sequence_predictions)
 
     print('timestep accuracy: ' + str(timestep_accuracy))
     print('sequence accuracy: ' + str(sequence_accuracy))
+    print('confusion matrix:')
+    print(confusion_matrix(sequence_ground_truth, sequence_predictions))
 
 
 def t_sne(activation_size, csv_file, nc_file):
